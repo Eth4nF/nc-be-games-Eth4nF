@@ -6,6 +6,7 @@ const app = require("../app");
 const { response } = require('express');
 
 beforeEach(() => seed(testData));
+
 afterAll(() => db.end());
 
 describe("GET /api", () => {
@@ -273,4 +274,37 @@ describe.only("POST /api/reviews/:review_id/comments", () => {
             console.log("response");
         })
     });
+})
+
+describe("DELETE /api/comments/:comment_id", () => {
+    let comment_id = 3;
+    test("204: ensure that an item is deleted", () => {
+        return request(app)
+        .delete(`/api/comments/${comment_id}`)
+        .expect(204)
+        .then((response) => {
+            console.log(response);
+            expect(response.noContent).toBe(true);
+        })
+    })
+
+    test("404 path not found error test", () => {
+        return request(app)
+        .delete(`/api/comment/${comment_id}`)
+        .expect(404)
+        .then((response) => {
+            console.log(response)
+            expect(response.body.msg).toBe("path not found");
+        })
+    })
+
+    test("400 bad path detected", () => {
+        return request(app)
+        .delete(`/api/comments/hello`)
+        .expect(400)
+        .then((response) => {
+            console.log(response)
+            expect(response.body.msg).toBe("Invalid input");
+        })
+    })
 })

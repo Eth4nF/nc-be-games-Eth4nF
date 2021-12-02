@@ -1,4 +1,4 @@
-const {fetchCategories, fetchReviews, fetchReviewById, fetchCommentsFromReviewId, updateReviewsWithId, insertCommentFromReviewId} = require("./model.js");
+const {fetchCategories, fetchReviews, fetchReviewById, fetchCommentsFromReviewId, updateReviewsWithId, insertCommentFromReviewId, removeCommentById} = require("./model.js");
 
 exports.getApi = (req, res, next) => {
     console.log("In the controller");
@@ -75,7 +75,20 @@ exports.postCommentFromReviewId = (req, res, next) => {
     const {review_id} = req.params;
 
     insertCommentFromReviewId(req.body, review_id).then((reviews) => {
-        res.status(201).send({reviews})
+        res.status(201).send({reviews});
+    })
+    .catch((err) => {
+        next(err);
+    })
+}
+
+exports.deleteCommentById = (req, res, next) => {
+    console.log("In the controller");
+
+    const {comment_id} = req.params;
+
+    removeCommentById(comment_id).then((comment) => {
+        res.status(204).send({comment});
     })
     .catch((err) => {
         next(err);

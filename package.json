@@ -4,16 +4,18 @@
   "description": "bc-nc-games",
   "main": "index.js",
   "scripts": {
+    "start": "node listen.js",
     "setup-dbs": "psql -f ./db/setup.sql",
     "seed": "node ./db/seeds/run-seed.js",
-    "test": "jest"
+    "test": "jest",
+    "seed:prod": "NODE_ENV=production DATABASE_URL=$(heroku config:get DATABASE_URL) npm run seed"
   },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/northcoders/be-nc-games.git"
   },
   "keywords": [],
-  "author": "",
+  "author": "NODE_ENV=production DATABASE_URL=$(heroku config:get DATABASE_URL) npm run seed",
   "license": "ISC",
   "bugs": {
     "url": "https://github.com/northcoders/be-nc-games/issues"

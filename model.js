@@ -98,6 +98,22 @@ exports.insertCommentFromReviewId = (obj, review_id) => {
             })
         }
         else
-         return rows;
+        return rows;
+    })
+}
+
+exports.removeCommentById = (comment_id) => {
+    console.log("In the model");
+
+    return db.query('DELETE FROM comments WHERE comment_id = $1 RETURNING *;', [comment_id]).then(({rows}) => {
+        console.log(rows);
+        if (!rows[0]) {
+            return Promise.reject({
+                status:400,
+                msg: "Wrong id"
+            })
+        }
+        else
+        return rows;
     })
 }
