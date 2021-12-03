@@ -262,7 +262,7 @@ describe("PATCH /api/reviews/:review_id", () => {
     })
 })
 
-describe.only("POST /api/reviews/:review_id/comments", () => {
+describe("POST /api/reviews/:review_id/comments", () => {
     const review_id = 3;
     const postObj = {username: "davidmassey6", body: "I liked this a lot"};
     test("201: ensure that the object passed is inserted into the database", () => {
@@ -305,6 +305,57 @@ describe("DELETE /api/comments/:comment_id", () => {
         .then((response) => {
             console.log(response)
             expect(response.body.msg).toBe("Invalid input");
+        })
+    })
+})
+
+describe("GET /api/users", () => {
+    test("200: returns all usernames from the users table", () => {
+        return request(app)
+        .get("/api/users")
+        .expect(200)
+        .then((response) => {
+            expect.objectContaining(
+                {
+                    username: expect.any(String),
+                    username: expect.any(String),
+                    username: expect.any(String),
+                    username: expect.any(String)
+                }
+            )
+        })
+    })
+
+    test("200: ensure that the datatype returned is an array of objects", () => {
+        return request(app)
+        .get("/api/users")
+        .expect(200)
+        .then((response) => {
+            expect(response.body).toBeInstanceOf(Object);
+        })
+    })
+
+    test("404: ensure when path is wrong, 404 is returned", () => {
+        return request(app)
+        .get("/api/user")
+        .expect(404)
+        .then((response) => {
+            expect(response.body.msg).toEqual('path not found')
+        })
+    })
+})
+
+describe.only("GET /api/users/:username", () => {
+    const username = "dav3rid";
+    test("200: an object that has all values from user that links to the given username is returned", () => {
+        return request(app)
+        .get(`/api/users/${username}`)
+        .expect(200)
+        .then((response) => {
+            console.log(response);
+            expect.objectContaining({
+                username: "dav3rid"
+            })
         })
     })
 })

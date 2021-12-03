@@ -1,4 +1,4 @@
-const {fetchCategories, fetchReviews, fetchReviewById, fetchCommentsFromReviewId, updateReviewsWithId, insertCommentFromReviewId, removeCommentById} = require("./model.js");
+const {fetchCategories, fetchReviews, fetchReviewById, fetchCommentsFromReviewId, updateReviewsWithId, insertCommentFromReviewId, removeCommentById, fetchUsers, fetchUsersByUsername} = require("./model.js");
 
 exports.getApi = (req, res, next) => {
     console.log("In the controller");
@@ -89,6 +89,30 @@ exports.deleteCommentById = (req, res, next) => {
 
     removeCommentById(comment_id).then((comment) => {
         res.status(204).send({comment});
+    })
+    .catch((err) => {
+        next(err);
+    })
+}
+
+exports.getUsers = (req, res, next) => {
+    console.log("In the controller");
+
+    fetchUsers().then((user) => {
+        res.status(200).send({user});
+    })
+    .catch((err) => {
+        next(err);
+    })
+}
+
+exports.getUsersByUsername = (req, res, next) => {
+    console.log("In the controller");
+
+    const {username} = req.params;
+
+    fetchUsersByUsername(username).then((user) => {
+        res.status(200).send({user});
     })
     .catch((err) => {
         next(err);

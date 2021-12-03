@@ -89,7 +89,7 @@ exports.updateReviewsWithId = (obj, review_id) => {
 exports.insertCommentFromReviewId = (obj, review_id) => {
     console.log("In the model");
 
-    return db.query('DROP TABLE IF EXISTS temp_comments; CREATE TABLE temp_comments (author VARCHAR PRIMARY KEY, body VARCHAR); INSERT INTO temp_comments VALUES ($1, $2); INSERT INTO comments (author, body) SELECT VALUES (author, body) FROM temp_comments WHERE review_id = $3 RETURNING *;', [obj.username, obj.body, review_id]).then(({rows}) => {
+    return db.query('INSERT INTO comments (author, body) SELECT VALUES (author, body) FROM temp_comments WHERE review_id = $3 RETURNING *;', [obj.username, obj.body, review_id]).then(({rows}) => {
         console.log(rows);
         if (!rows[0]) {
             return Promise.reject({
@@ -107,6 +107,38 @@ exports.removeCommentById = (comment_id) => {
 
     return db.query('DELETE FROM comments WHERE comment_id = $1 RETURNING *;', [comment_id]).then(({rows}) => {
         console.log(rows);
+        if (!rows[0]) {
+            return Promise.reject({
+                status:400,
+                msg: "Wrong id"
+            })
+        }
+        else
+        return rows;
+    })
+}
+
+exports.fetchUsers = () => {
+    console.log("In the model");
+
+    return db.query('SELECT username FROM users;').then(({rows}) => {
+        console.log(rows);
+
+        if (!rows[0]) {
+            return Promise.reject({
+                status: 400,
+                msg: "Wrong id"
+            })
+        }
+        else
+        return rows;
+    })
+}
+
+exports.fetchUsersByUsername = (username) => {
+    console.log("In the model");
+
+    return db.query('SELECT * FROM users WHERE username = $1;', [username]).then(({rows}) => {
         if (!rows[0]) {
             return Promise.reject({
                 status:400,
