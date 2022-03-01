@@ -262,20 +262,6 @@ describe("PATCH /api/reviews/:review_id", () => {
     })
 })
 
-describe("POST /api/reviews/:review_id/comments", () => {
-    const review_id = 3;
-    const postObj = {username: "davidmassey6", body: "I liked this a lot"};
-    test("201: ensure that the object passed is inserted into the database", () => {
-        return request(app)
-        .post(`/api/reviews/${review_id}/comments`)
-        .send(postObj)
-        .expect(201)
-        .then((response) => {
-            console.log("response");
-        })
-    });
-})
-
 describe("DELETE /api/comments/:comment_id", () => {
     let comment_id = 3;
     test("204: ensure that an item is deleted", () => {
@@ -345,7 +331,7 @@ describe("GET /api/users", () => {
     })
 })
 
-describe.only("GET /api/users/:username", () => {
+describe("GET /api/users/:username", () => {
     const username = "dav3rid";
     test("200: an object that has all values from user that links to the given username is returned", () => {
         return request(app)
