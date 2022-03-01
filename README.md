@@ -21,7 +21,7 @@ npm run seed
 
 do this twice to initialise the db after you have read through the setup env part of the readme.
 
-4. Run tests
+4: Run tests
 To run the provided tests, use terminal command:
 
 npm run test
