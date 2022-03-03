@@ -3,6 +3,7 @@ const {getApi, getCategories, getReviews, getReviewById, getCommentsFromReviewId
 const {handleCustomErrors, handlePsqlErrors, handleServerErrors} = require("./errors");
 const cors = require('cors');
 const app = express();
+app.use(cors());
 app.use(express.json());
 
 app.get("/api", getApi);
@@ -29,7 +30,6 @@ app.all("/*", (req, res) => {
     res.status(404).send({msg: `path not found`})
 });
 
-app.use(cors());
 app.use(handleCustomErrors);
 app.use(handlePsqlErrors);
 app.use(handleServerErrors);
