@@ -3,7 +3,6 @@ const testData = require('../db/data/test-data/index.js');
 const seed = require('../db/seeds/seed.js');
 const request = require("supertest");
 const app = require("../app");
-const { response } = require('express');
 
 beforeEach(() => seed(testData));
 
@@ -178,7 +177,6 @@ describe("GET /api/reviews/:review_id/comments", () => {
         .expect(200)
         .then((response) => {
             response.body.forEach(item => {
-                console.log(response.body.length);
                 expect(response.body.length).toBe(3);
             })
         })
@@ -269,7 +267,6 @@ describe("DELETE /api/comments/:comment_id", () => {
         .delete(`/api/comments/${comment_id}`)
         .expect(204)
         .then((response) => {
-            console.log(response);
             expect(response.noContent).toBe(true);
         })
     })
@@ -279,7 +276,6 @@ describe("DELETE /api/comments/:comment_id", () => {
         .delete(`/api/comment/${comment_id}`)
         .expect(404)
         .then((response) => {
-            console.log(response)
             expect(response.body.msg).toBe("path not found");
         })
     })
@@ -289,7 +285,6 @@ describe("DELETE /api/comments/:comment_id", () => {
         .delete(`/api/comments/hello`)
         .expect(400)
         .then((response) => {
-            console.log(response)
             expect(response.body.msg).toBe("Invalid input");
         })
     })
@@ -338,7 +333,6 @@ describe("GET /api/users/:username", () => {
         .get(`/api/users/${username}`)
         .expect(200)
         .then((response) => {
-            console.log(response);
             expect.objectContaining({
                 username: "dav3rid"
             })

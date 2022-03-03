@@ -1,6 +1,5 @@
 const db = require("../connection.js");
 const format = require("pg-format");
-const { query } = require("../connection.js");
 
 const seed = (data) => {
   const { categoryData, commentData, reviewData, userData } = data;
@@ -48,7 +47,7 @@ const seed = (data) => {
     FOREIGN KEY (review_id) REFERENCES reviews (review_id),
     votes INT DEFAULT 0,
     created_at TIME DEFAULT CURRENT_TIMESTAMP,
-    body TEXT);
+    body TEXT NOT NULL);
     `)
   })
   .then(() => {
