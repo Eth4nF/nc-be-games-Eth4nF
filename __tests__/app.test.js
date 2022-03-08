@@ -339,3 +339,47 @@ describe("GET /api/users/:username", () => {
         })
     })
 })
+
+describe("PATCH /api/reviews/:review_id", () => {
+    test("200: Returns single object equal to specified review_id with altered votes", () => {
+      return request(app)
+        .patch("/api/reviews/2")
+        .send({ inc_votes: 1 })
+        .expect(200)
+        .then(({ body }) => {
+          expect(body.reviews[0].votes).toBe(6);
+          expect(body.reviews[0].review_id).toBe(2);
+          expect(typeof body.reviews[0]).toBe("object");
+        });
+    });
+    test("400: Returns error message invalid input when inc_votes is not a number", () => {
+      return request(app)
+        .patch("/api/reviews/2")
+        .send({ inc_votes: "a hundred" })
+        .expect(400)
+        .then(({ body }) => {
+          expect(body.msg).toBe("Invalid input");
+        });
+    });
+    test("400: Returns error message invalid input when review ID is not a number", () => {
+      return request(app)
+        .patch("/api/reviews/flipflop")
+        .send({ inc_votes: 1 })
+        .expect(400)
+        .then(({ body }) => {
+          expect(body.msg).toBe("Invalid input");
+        });
+    });
+    // test("404: Returns page not found when review ID does not exist", () => {
+//         return request(app)
+//         .patch("/api/reviews/245245")
+//         .send({ inc_votes: 1 })
+//         .expect(404)
+//         .then(({ body }) => {
+//             console.log(body, ">>>>>>>>>>>>>>>>")
+//             expect(body.msg).toBe(
+//                 "Page not found: Specified review ID does not exist."
+//           );
+//         });
+//     });
+  });

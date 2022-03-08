@@ -149,3 +149,35 @@ exports.fetchUsersByUsername = (username) => {
         return rows;
     })
 }
+
+exports.patchVotes = (inc_votes, review_id) => {
+    return db
+      .query(`SELECT * FROM reviews`)
+      .then(({ rows }) => {
+        if (review_id > rows.length) {
+          return Promise.reject({
+            status: 404,
+            msg: "Page not found: Specified review ID does not exist.",
+          });
+        }
+      })
+      .then(() => {
+        return db
+          .query(
+            `UPDATE reviews 
+                  SET votes = votes + $1 
+                  WHERE review_id = $2;`,
+            [inc_votes, review_id]
+          )
+          .then(() => {
+            return db.query(
+              `SELECT * FROM reviews 
+                      WHERE review_id = $1;`,
+              [review_id]
+            );
+          })
+          .then(({ rows }) => {
+            return rows[0];
+          });
+      });
+  };

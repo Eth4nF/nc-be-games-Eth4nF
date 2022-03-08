@@ -1,4 +1,4 @@
-const {fetchCategories, fetchReviews, fetchReviewById, fetchCommentsFromReviewId, updateReviewsWithId, insertCommentFromReviewId, removeCommentById, fetchUsers, fetchUsersByUsername} = require("./model.js");
+const {fetchCategories, fetchReviews, fetchReviewById, fetchCommentsFromReviewId, updateReviewsWithId, insertCommentFromReviewId, removeCommentById, fetchUsers, fetchUsersByUsername, patchVotes} = require("./model.js");
 
 exports.getApi = (req, res, next) => {
     console.log("In the controller");
@@ -118,3 +118,15 @@ exports.getUsersByUsername = (req, res, next) => {
         next(err);
     })
 }
+
+exports.patchReviews = (req, res, next) => {
+    const { inc_votes } = req.body;
+    const { review_id } = req.params;
+    patchVotes(inc_votes, review_id)
+      .then((response) => {
+        res.status(200).send({ review: response });
+      })
+      .catch((err) => {
+        next(err);
+      });
+  };
