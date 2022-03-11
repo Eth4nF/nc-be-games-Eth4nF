@@ -18,22 +18,50 @@ exports.fetchCategories = () => {
     })
 };
 
-exports.fetchReviews = () => {
-    console.log("In the model");
-
-    return db.query('SELECT * FROM reviews;').then(({rows}) => {
-        let reviews = rows[0];
-
-        if (!reviews) {
-            return Promise.reject({
-                status: 404,
-                msg: `No review found`
-            })
-        }
-        else
-        // console.log('result', result);
-        return rows;
-    })
+exports.fetchReviews = async ({sort_by = 'created_at', order = 'desc', category, owner}) => {
+    const validSortBy = await validateSortBy(sort_by, [
+        'created_at',
+        'votes',
+        'title',
+        'comment_count',
+        'owner',
+        'designer',
+      ]);
+      const validOrder = await validateOrder(order);
+      const dbQueryParams = [];
+    
+      let queryStr = `SELECT reviews.*,
+      COUNT(comments.comment_id) AS comment_count
+      FROM reviews
+      LEFT JOIN comments ON comments.review_id = reviews.review_id
+    `;
+    
+      if (category) {
+        dbQueryParams.push(category);
+        queryStr += `WHERE reviews.category ILIKE $${dbQueryParams.length}`;
+      }
+    
+      if (owner) {
+        dbQueryParams.push(owner);
+        queryStr += `${category ? 'AND ' : ''}WHERE reviews.owner ILIKE $${
+          dbQueryParams.length
+        }`;
+      }
+    
+      queryStr += `
+      GROUP BY reviews.review_id
+      ORDER BY ${validSortBy} ${validOrder};
+      `;
+    
+      const reviews = await db
+        .query(queryStr, dbQueryParams)
+        .then((result) => result.rows);
+    
+      if (!reviews.length) {
+        if (category) await checkExists('categories', 'slug', category);
+        if (owner) await checkExists('users', 'username', owner);
+      }
+      return reviews;
 };
 
 exports.fetchReviewById = (review_id) => {

@@ -19,10 +19,7 @@ exports.getCategories = (req, res, next) => {
 };
 
 exports.getReviews = (req, res, next) => {
-    console.log("In the controller");
-
-    fetchReviews().then((reviews) => {
-
+    fetchReviews(req.query).then((reviews) => {
         res.status(200).send(reviews)
     })
     .catch((err => {
