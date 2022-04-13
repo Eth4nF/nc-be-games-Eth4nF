@@ -260,36 +260,6 @@ describe("PATCH /api/reviews/:review_id", () => {
     })
 })
 
-describe("DELETE /api/comments/:comment_id", () => {
-    let comment_id = 3;
-    test("204: ensure that an item is deleted", () => {
-        return request(app)
-        .delete(`/api/comments/${comment_id}`)
-        .expect(204)
-        .then((response) => {
-            expect(response.noContent).toBe(true);
-        })
-    })
-
-    test("404 path not found error test", () => {
-        return request(app)
-        .delete(`/api/comment/${comment_id}`)
-        .expect(404)
-        .then((response) => {
-            expect(response.body.msg).toBe("path not found");
-        })
-    })
-
-    test("400 bad path detected", () => {
-        return request(app)
-        .delete(`/api/comments/hello`)
-        .expect(400)
-        .then((response) => {
-            expect(response.body.msg).toBe("Invalid input");
-        })
-    })
-})
-
 describe("GET /api/users", () => {
     test("200: returns all usernames from the users table", () => {
         return request(app)
@@ -370,16 +340,125 @@ describe("PATCH /api/reviews/:review_id", () => {
           expect(body.msg).toBe("Invalid input");
         });
     });
+
+    
     // test("404: Returns page not found when review ID does not exist", () => {
-//         return request(app)
-//         .patch("/api/reviews/245245")
-//         .send({ inc_votes: 1 })
-//         .expect(404)
+        //         return request(app)
+        //         .patch("/api/reviews/245245")
+        //         .send({ inc_votes: 1 })
+        //         .expect(404)
 //         .then(({ body }) => {
-//             console.log(body, ">>>>>>>>>>>>>>>>")
-//             expect(body.msg).toBe(
-//                 "Page not found: Specified review ID does not exist."
-//           );
-//         });
-//     });
-  });
+    //             console.log(body, ">>>>>>>>>>>>>>>>")
+    //             expect(body.msg).toBe(
+        //                 "Page not found: Specified review ID does not exist."
+        //           );
+        //         });
+        //     });
+    });
+
+    describe("POST /api/reviews/:review_id/comments", () => {
+        test("201: Request body accepts an object with the properties username and body, responding with the posted comment", () => {
+          return request(app)
+            .post("/api/reviews/1/comments")
+            .send({
+              username: `mallionaire`,
+              body: `Very nice review!`,
+            })
+            .expect(201)
+            .then(({ body }) => {
+                console.log(body)
+              expect(body.comment.author).toBe("mallionaire");
+              expect(body.comment).hasOwnProperty(
+                "comment_id",
+                "author",
+                "review_id",
+                "votes",
+                "created_at",
+                "body"
+              );
+            });
+        });
+        test("404: Returns page not found error message when review ID does not exist", () => {
+          return request(app)
+            .post("/api/reviews/3563563/comments")
+            .send({
+              username: `mallionaire`,
+              body: `Very nice review!`,
+            })
+            .expect(404)
+            .then(({ body }) => {
+              expect(body.msg).toBe(
+                "Page not found: Specified review ID does not exist."
+              );
+            });
+        });
+        test("400: Returns invalid input error message when review ID is not a number", () => {
+          return request(app)
+            .post("/api/reviews/one/comments")
+            .send({
+              username: `mallionaire`,
+              body: `Very nice review!`,
+            })
+            .expect(400)
+            .then(({ body }) => {
+              expect(body.msg).toBe("Invalid input: Syntax error in path.");
+            });
+        });
+        test("400: Returns invalid input error message when input object missing a required key (username or body)", () => {
+          return request(app)
+            .post("/api/reviews/1/comments")
+            .send({
+              body: `Very nice review!`,
+            })
+            .expect(400)
+            .then(({ body }) => {
+              expect(body.msg).toBe("Invalid input: Syntax error in path.");
+            });
+        });
+        test("404: Returns page not found error message when username does not exist", () => {
+          return request(app)
+            .post("/api/reviews/1/comments")
+            .send({
+              username: `mrcool`,
+              body: `Very nice review!`,
+            })
+            .expect(404)
+            .then(({ body }) => {
+              expect(body.msg).toBe("Page not found: Username does not exist.");
+            });
+        });
+      });
+
+      describe.only("DELETE /api/comments/:comment_id", () => {
+        test("204: Responds with status 204 and no content", () => {
+          return request(app).delete("/api/comments/1").expect(204);
+        });
+        test("204: Confirms that specified comment is deleted", () => {
+          return request(app)
+            .delete("/api/comments/1")
+            .expect(204)
+            .then(() => {
+              return db.query(`SELECT * FROM comments`);
+            })
+            .then(({ rows }) => {
+              expect(rows.length).toBe(5);
+              expect(rows[0].comment_id).toBe(2);
+            });
+        });
+        test("404: Returns page not found error message when comment ID does not exist", () => {
+          return request(app)
+            .delete("/api/comments/1363563")
+            .expect(404)
+            .then(({ body }) => {
+              expect(body.msg).toEqual("Page not found: comment ID does not exist.");
+            });
+        });
+        test("400: Returns invalid input error message when ID is wrong type", () => {
+          return request(app)
+            .delete("/api/comments/snoopy")
+            .expect(400)
+            .then(({ body }) => {
+              expect(body.msg).toEqual("Invalid input");
+            });
+        });
+      });

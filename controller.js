@@ -1,4 +1,4 @@
-const {fetchCategories, fetchReviews, fetchReviewById, fetchCommentsFromReviewId, updateReviewsWithId, insertCommentFromReviewId, removeCommentById, fetchUsers, fetchUsersByUsername, patchVotes} = require("./model.js");
+const {fetchCategories, fetchReviews, fetchReviewById, fetchCommentsFromReviewId, updateReviewsWithId, deleteComment, fetchUsers, fetchUsersByUsername, patchVotes, postComment} = require("./model.js");
 
 exports.getApi = (req, res, next) => {
     console.log("In the controller");
@@ -66,32 +66,6 @@ exports.patchReviewsWithId = (req, res, next) => {
     })
 }
 
-exports.postCommentFromReviewId = (req, res, next) => {
-    console.log("In the controller");
-
-    const {review_id} = req.params;
-
-    insertCommentFromReviewId(req.body, review_id).then((reviews) => {
-        res.status(201).send({reviews});
-    })
-    .catch((err) => {
-        next(err);
-    })
-}
-
-exports.deleteCommentById = (req, res, next) => {
-    console.log("In the controller");
-
-    const {comment_id} = req.params;
-
-    removeCommentById(comment_id).then((comment) => {
-        res.status(204).send({comment});
-    })
-    .catch((err) => {
-        next(err);
-    })
-}
-
 exports.getUsers = (req, res, next) => {
     console.log("In the controller");
 
@@ -127,3 +101,22 @@ exports.patchReviews = (req, res, next) => {
         next(err);
       });
   };
+
+  exports.postCommentByReviewId = (req, res, next) => {
+    postComment(req)
+      .then((response) => {
+        res.status(201).send({ comment: response });
+      })
+      .catch((err) => {
+        next(err);
+      });
+  };
+
+  exports.deleteCommentById = (req, res, next) => {
+    deleteComment(req).then(() => {
+        res.status(204).send()
+    })
+        .catch((err) => {
+            next(err)
+        });
+};

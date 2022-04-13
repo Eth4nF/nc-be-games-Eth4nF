@@ -1,4 +1,5 @@
 const db = require("./db/connection");
+const format = require("pg-format");
 
 exports.fetchCategories = () => {
     console.log("In the model");
@@ -90,38 +91,6 @@ exports.updateReviewsWithId = (obj, review_id) => {
     })
 };
 
-exports.insertCommentFromReviewId = (obj, review_id) => {
-    console.log("In the model");
-
-    return db.query('INSERT INTO comments (author, body) SELECT VALUES (author, body) FROM temp_comments WHERE review_id = $3 RETURNING *;', [obj.username, obj.body, review_id]).then(({rows}) => {
-        console.log(rows);
-        if (!rows[0]) {
-            return Promise.reject({
-                status: 400,
-                msg: "Wrong id"
-            })
-        }
-        else
-        return rows;
-    })
-}
-
-exports.removeCommentById = (comment_id) => {
-    console.log("In the model");
-
-    return db.query('DELETE FROM comments WHERE comment_id = $1 RETURNING *;', [comment_id]).then(({rows}) => {
-        console.log(rows);
-        if (!rows[0]) {
-            return Promise.reject({
-                status:400,
-                msg: "Wrong id"
-            })
-        }
-        else
-        return rows;
-    })
-}
-
 exports.fetchUsers = () => {
     console.log("In the model");
 
@@ -185,3 +154,100 @@ exports.patchVotes = (inc_votes, review_id) => {
           });
       });
   };
+
+  exports.postComment = (req) => {
+    const { review_id } = req.params;
+    const { body } = req;
+    const regex = /[0-9]/;
+  
+    if (!review_id.match(regex)) {
+      return Promise.reject({
+        status: 400,
+        msg: "Invalid input: Syntax error in path.",
+      });
+    }
+    if (!body.username) {
+      return Promise.reject({
+        status: 400,
+        msg: "Invalid input: Syntax error in path.",
+      });
+    }
+    if (!body.body) {
+      return Promise.reject({
+        status: 400,
+        msg: "Invalid input: Syntax error in path.",
+      });
+    }
+    if (
+      body.username !== "mallionaire" &&
+      body.username !== "philippaclaire9" &&
+      body.username !== "bainesface" &&
+      body.username !== "dav3rid" &&
+      body.username !== "grumpy19" &&
+      body.username !== "happyamy2016" &&
+      body.username !== "cooljmessy" &&
+      body.username !== "weegembump" &&
+      body.username !== "jessjelly" &&
+      body.username !== "tickle122"
+    ) {
+      return Promise.reject({
+        status: 404,
+        msg: "Page not found: Username does not exist.",
+      });
+    }
+    body.author = body.username;
+    delete body.username;
+    return db
+      .query(`SELECT * FROM reviews`)
+      .then(({ rows }) => {
+        if (review_id > rows.length) {
+          return Promise.reject({
+            status: 404,
+            msg: "Page not found: Specified review ID does not exist.",
+          });
+        }
+      })
+      .then(() => {
+        let queryStr = format(
+          `
+                  INSERT INTO comments (body, votes, author, review_id) 
+                  VALUES %L 
+                  RETURNING *;`,
+          [[body.body, 0, body.author, review_id]]
+        );
+        return db.query(queryStr).then(({ rows }) => {
+          return rows[0];
+        });
+      });
+  };
+
+  exports.deleteComment = (req) => {
+	const { comment_id } = req.params;
+	if (typeof Number(comment_id) !== "number") {
+		return Promise.reject({
+			status: 400,
+			msg: "Invalid input: comment ID is a number.",
+		});
+	}
+	return db
+		.query(
+			`SELECT * FROM comments 
+			WHERE comment_id = $1`,
+			[comment_id]
+	)
+		.then(({ rows }) => {
+			if (rows.length === 0) {
+				return Promise.reject({
+					status: 404,
+					msg: "Page not found: comment ID does not exist.",
+				});
+			}
+		})
+		.then(() => {
+			return db.query(
+				`DELETE FROM comments 
+				WHERE comment_id = $1`,
+				[comment_id]
+			);
+		});
+};
